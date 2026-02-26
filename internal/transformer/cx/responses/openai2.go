@@ -1,6 +1,8 @@
 package responses
 
 import (
+	"encoding/json"
+
 	"github.com/lich0821/ccNexus/internal/transformer"
 )
 
@@ -19,7 +21,17 @@ func (t *OpenAI2Transformer) Name() string {
 }
 
 func (t *OpenAI2Transformer) TransformRequest(req []byte) ([]byte, error) {
-	return req, nil
+	if t.model == "" {
+		return req, nil
+	}
+
+	var reqMap map[string]any
+	if err := json.Unmarshal(req, &reqMap); err != nil {
+		return nil, err
+	}
+
+	reqMap["model"] = t.model
+	return json.Marshal(reqMap)
 }
 
 func (t *OpenAI2Transformer) TransformResponse(resp []byte, isStreaming bool) ([]byte, error) {
